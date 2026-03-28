@@ -276,6 +276,43 @@ Fill in the patient details and click **Predict** to see the result.
 
 ---
 
+## Deployment
+
+### Heroku Deployment
+
+1. Install Heroku CLI and login:
+   ```bash
+   heroku login
+   ```
+
+2. Create a new Heroku app:
+   ```bash
+   heroku create your-app-name
+   ```
+
+3. Push to Heroku:
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push heroku main
+   ```
+
+4. Open the app:
+   ```bash
+   heroku open
+   ```
+
+The app will be live at `https://your-app-name.herokuapp.com/`
+
+### Other Hosting Options
+
+- **Render**: Free tier, easy deployment from GitHub
+- **Railway**: Simple Python app hosting
+- **AWS Elastic Beanstalk**: Scalable, but more complex
+- **DigitalOcean App Platform**: Good for Flask apps
+
+---
+
 ## Testing the System
 
 ### Sample Test Cases
