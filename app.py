@@ -2,6 +2,25 @@ from flask import Flask, request, render_template
 import pickle
 import numpy as np
 import os
+import sys
+import types
+
+# Ensure legacy numpy module path is available for old pickled models (numpy._core)
+if 'numpy._core' not in sys.modules:
+    ncore = types.ModuleType('numpy._core')
+    ncore.__path__ = []
+    sys.modules['numpy._core'] = ncore
+
+# Map known submodules from numpy._core.* to numpy.core.* for compatibility
+legacy_submodules = ['multiarray', 'umath', 'numeric', 'npyio', 'fromnumeric', 'numpyio']
+for sub in legacy_submodules:
+    legacy_name = f'numpy._core.{sub}'
+    target_name = f'numpy.core.{sub}'
+    if legacy_name not in sys.modules:
+        try:
+            sys.modules[legacy_name] = __import__(target_name, fromlist=['*'])
+        except ModuleNotFoundError:
+            pass
 
 app = Flask(__name__)
 

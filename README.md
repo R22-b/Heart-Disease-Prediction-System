@@ -262,15 +262,36 @@ Scaler saved to scaler.pkl
 
 ### Run the Web App
 
+#### Option A (Fastest, single command)
+
+From the project directory (`C:\Users\Ravikiran\OneDrive\Desktop\bhavana`):
+
 ```bash
 python app.py
 ```
 
-Then open your browser and go to:
+#### Option B (One command with dependencies install, in case not installed yet)
 
+```bash
+pip install flask numpy scikit-learn pandas
+python app.py
 ```
-http://127.0.0.1:5000/
+
+#### Option C (Fully recommended local environment)
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1   # PowerShell
+pip install -r requirements.txt
+python app.py
 ```
+
+#### Open in browser
+
+- Local: `http://127.0.0.1:5000/`
+- Network (any device on same LAN): `http://<your-PC-IP>:5000/` (e.g. `http://192.168.1.106:5000/`)
+
+> If you are on Windows and get a firewall prompt, allow access for Python.
 
 Fill in the patient details and click **Predict** to see the result.
 
@@ -278,38 +299,71 @@ Fill in the patient details and click **Predict** to see the result.
 
 ## Deployment
 
-### Heroku Deployment
+This Flask application can be hosted entirely on a single platform (no frontend/backend split required). Here are the best options for complete, one-click deployment:
 
-1. Install Heroku CLI and login:
+### Option 1: Heroku (Recommended - Easiest)
+
+**Why Heroku?** Hosts your entire Flask app + ML models in one place with free tier available.
+
+#### Step-by-Step Heroku Deployment
+
+1. **Install Heroku CLI**
+   Download from: https://devcenter.heroku.com/articles/heroku-cli
+
+2. **Login to Heroku**
    ```bash
    heroku login
    ```
+   This opens your browser for authentication.
 
-2. Create a new Heroku app:
+3. **Create Heroku App**
    ```bash
-   heroku create your-app-name
+   heroku create your-unique-app-name
    ```
+   (Choose a unique name, e.g., `heart-disease-predictor-123`)
 
-3. Push to Heroku:
+4. **Deploy Your App**
    ```bash
-   git add .
-   git commit -m "Ready for deployment"
    git push heroku main
    ```
 
-4. Open the app:
+5. **Open Your Live App**
    ```bash
    heroku open
    ```
 
-The app will be live at `https://your-app-name.herokuapp.com/`
+**Your app will be live at:** `https://your-app-name.herokuapp.com/`
+
+**Free Tier Details:**
+- 550-1000 hours/month free
+- App sleeps after 30 minutes inactivity
+- Wakes automatically on next visit
+
+### Option 2: Render (Also Complete Hosting)
+
+**Why Render?** Free tier with GitHub integration, hosts entire app.
+
+1. Go to [render.com](https://render.com)
+2. Connect your GitHub repository
+3. Choose "Web Service" → Python
+4. Set build command: `pip install -r requirements.txt`
+5. Set start command: `gunicorn app:app`
+6. Click Deploy!
+
+**Free Tier:** 750 hours/month
+
+### What Gets Hosted
+- ✅ Flask backend with ML predictions
+- ✅ HTML templates and CSS styling
+- ✅ Trained models (model.pkl, scaler.pkl)
+- ✅ All dependencies and configurations
 
 ### Other Hosting Options
+- **Railway**: Simple Python hosting, GitHub integration
+- **DigitalOcean App Platform**: Affordable ($5/month), good for Flask
+- **AWS Elastic Beanstalk**: Scalable but more complex setup
 
-- **Render**: Free tier, easy deployment from GitHub
-- **Railway**: Simple Python app hosting
-- **AWS Elastic Beanstalk**: Scalable, but more complex
-- **DigitalOcean App Platform**: Good for Flask apps
+**Note:** Netlify is not suitable as it doesn't support Python/Flask applications.
 
 ---
 
