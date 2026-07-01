@@ -26,15 +26,17 @@ for sub in legacy_submodules:
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
-# Defer loading model and scaler until the app is ready and use absolute paths
+# ---------- Load model and scaler at module level ----------
+# @app.before_first_request was removed in Flask 2.3+, so we load at import time.
 model = None
 scaler = None
 
-@app.before_first_request
-def load_model_and_scaler():
+def _load_model_and_scaler():
+    """Load model and scaler from disk. Called once at import time."""
     global model, scaler
-    model_path = os.path.join(app.root_path, 'model.pkl')
-    scaler_path = os.path.join(app.root_path, 'scaler.pkl')
+    base = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(base, 'model.pkl')
+    scaler_path = os.path.join(base, 'scaler.pkl')
     try:
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
@@ -42,9 +44,13 @@ def load_model_and_scaler():
             scaler = pickle.load(f)
         app.logger.info('Loaded model and scaler from %s and %s', model_path, scaler_path)
     except FileNotFoundError as e:
-        app.logger.exception('Model or scaler file not found: %s', e)
+        app.logger.error('Model or scaler file not found: %s', e)
     except Exception as e:
-        app.logger.exception('Failed loading model or scaler: %s', e)
+        app.logger.error('Failed loading model or scaler: %s', e)
+
+_load_model_and_scaler()
+
+# ---------- Routes ----------
 
 @app.route('/')
 def home():
@@ -94,18 +100,4 @@ def health():
         return jsonify({'status': 'unhealthy', 'reason': 'model or scaler not loaded'}), 503
 
 if __name__ == '__main__':
-    # When running locally use the PATH from app.root_path so files load consistently
-    try:
-        # Attempt to load model/scaler in case the server is started with python app.py (single process)
-        if model is None or scaler is None:
-            model_path = os.path.join(app.root_path, 'model.pkl')
-            scaler_path = os.path.join(app.root_path, 'scaler.pkl')
-            with open(model_path, 'rb') as f:
-                model = pickle.load(f)
-            with open(scaler_path, 'rb') as f:
-                scaler = pickle.load(f)
-    except Exception:
-        # Defer the error to the normal logging in load_model_and_scaler or when handling requests
-        app.logger.exception('Could not pre-load model/scaler on startup')
-
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

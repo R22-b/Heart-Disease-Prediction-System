@@ -1,8 +1,11 @@
 services:
   - type: web
     name: Heart-Disease-Prediction-System
-    env: docker
+    runtime: docker
     branch: main
-    plan: starter
-    dockerfilePath: Dockerfile
+    plan: free
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "5000"
