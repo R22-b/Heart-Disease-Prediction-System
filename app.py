@@ -1,9 +1,10 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import pickle
 import numpy as np
 import os
 import sys
 import types
+import logging
 
 # Ensure legacy numpy module path is available for old pickled models (numpy._core)
 if 'numpy._core' not in sys.modules:
@@ -23,6 +24,7 @@ for sub in legacy_submodules:
             pass
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
 
 # Defer loading model and scaler until the app is ready and use absolute paths
 model = None
@@ -82,6 +84,14 @@ def predict():
     except Exception as e:
         app.logger.exception('Prediction failed: %s', e)
         return render_template('index.html', prediction='Error during prediction. Check server logs.')
+
+@app.route('/health')
+def health():
+    """Health check endpoint: returns 200 if model and scaler are loaded, 503 otherwise."""
+    if model is not None and scaler is not None:
+        return jsonify({'status': 'ok'}), 200
+    else:
+        return jsonify({'status': 'unhealthy', 'reason': 'model or scaler not loaded'}), 503
 
 if __name__ == '__main__':
     # When running locally use the PATH from app.root_path so files load consistently
